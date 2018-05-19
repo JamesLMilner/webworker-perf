@@ -1,4 +1,3 @@
-const results = [];
 const createData = (number, n) => {
     const data = { label : number };
     const dataTypes = ["object", "string", "boolean", "array", "number"];
@@ -7,14 +6,19 @@ const createData = (number, n) => {
         switch(x){
         case "object":
             data[i] = {};
+            break;
         case "string":
             data[i] = "test";
+            break;
         case "boolean":
             data[i] = false;
+            break;
         case "array": 
             data[i] = [];
+            break;
         case "number":
-            data[i] = 1
+            data[i] = 1;
+            break;
         }
     }
     return data;
@@ -26,7 +30,7 @@ const timeWorker = (data) => {
     console.log("Using worker number", data.label);
     const workerFile = `./worker.js`;
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         
         const workerStart = performance.now();
         const worker = new Worker(workerFile);
@@ -59,57 +63,61 @@ const timeWorker = (data) => {
 };
 
 const createChart = (data) => {
-    if (window.Chart) {
-        const ctx = document.getElementById('chart').getContext('2d');
-        // const labels = ["create", "postMessage", "onmessage",  "terminate"];
-        const colors = ["#63cc8a", "#6389cc", "#b763cc", "#cc6376", "#c6cc63", "#cc9b63", "#cc6363"]
-        const labels = ["postMessage", "onmessage"];
-
-        const datasets = data.map((d, i) => {
-            return {
-                label: "" + d.n,
-                data: [
-                    //parseInt(d.create),
-                    parseInt(d.postMessage),
-                    parseInt(d.onmessage),
-                    //parseInt(d.terminate)
-                ],
-                backgroundColor: colors[i]
-            }
-        })
-
-        const chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: datasets
-            },
-            options: {
-
-                scales: {
-                    yAxes : [{
-                        scaleLabel : {
-                            display: true,
-                            labelString: "Milliseconds"
-                        }
-                    }],
-                    xAxes : [{
-                        scaleLabel : {
-                            display: true,
-                            labelString: "Method"
-                        }
-                    }]
-                }
-            }
-        });
-
-        console.log(chart);
-
-        return chart;
+    if (!window.Chart) {
+        return;
     }
+    const ctx = document.getElementById('chart').getContext('2d');
+    // const labels = ["create", "postMessage", "onmessage",  "terminate"];
+    const colors = ["#63cc8a", "#6389cc", "#b763cc", "#cc6376", "#c6cc63", "#cc9b63", "#cc6363"]
+    const labels = ["postMessage", "onmessage"];
+
+    const datasets = data.map((d, i) => {
+        return {
+            label: "" + d.n,
+            data: [
+                //parseInt(d.create),
+                parseInt(d.postMessage),
+                parseInt(d.onmessage),
+                //parseInt(d.terminate)
+            ],
+            backgroundColor: colors[i]
+        }
+    })
+
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+
+            scales: {
+                yAxes : [{
+                    scaleLabel : {
+                        display: true,
+                        labelString: "Milliseconds"
+                    },
+                    ticks: {
+                        suggestedMin: 0,
+                        suggestedMax: 2000
+                    }
+                }],
+                xAxes : [{
+                    scaleLabel : {
+                        display: true,
+                        labelString: "Method"
+                    }
+                }]
+            }
+        }
+    });
+
+    return chart;
 }
 
 const runTest = async () => {
+    const results = [];
     const dataContainer = document.getElementById("results");
     let n = 10;
     const max = 10000000;

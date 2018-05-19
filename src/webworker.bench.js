@@ -166,5 +166,6 @@ const runTest = async (stringify) => {
 
 }
 
-runTest(false);
-runTest(true);
+runTest(false).then(() => {
+    runTest(true);
+});

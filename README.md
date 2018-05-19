@@ -9,7 +9,7 @@ This repository benchmarks the cost of various aspects of Web Workers including:
 
 # Demo
 
-See the [GitHub pages page](https://jamesmilneruk.github.io/webworker-perf)
+See the [GitHub pages site for this repo](https://jamesmilneruk.github.io/webworker-perf)
 
 # License 
 

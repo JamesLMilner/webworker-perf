@@ -116,7 +116,7 @@ const runTest = async () => {
     let i = 1;
 
     while (n < max) {
-        console.log("Timing worke for n", n)
+        console.log("Timing worker for n", n)
         const data = createData(i, n);
         const result = await timeWorker(data);
         results.push(result);

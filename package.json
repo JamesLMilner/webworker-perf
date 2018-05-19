@@ -1,0 +1,33 @@
+{
+  "name": "webworkerperf",
+  "version": "1.0.0",
+  "description": "",
+  "source": "webworker.bench.js",
+  "main": "dist/webworker.bench.umd.js",
+  "module": "dist/webworker.bench.m.js",
+  "scripts": {
+    "lint": "eslint ./",
+    "build": "microbundle ./webworker.bench.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JamesMilnerUK/webworker-perf.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JamesMilnerUK/webworker-perf/issues"
+  },
+  "homepage": "https://github.com/JamesMilnerUK/webworker-perf#readme",
+  "dependencies": {
+    "chart.js": "^2.7.2",
+    "eslint": "^4.19.1",
+    "microbundle": "^0.4.4"
+  },
+  "eslintConfig": {
+    "parserOptions": {
+        "ecmaVersion": 7
+    },
+    "extends": "eslint:recommended"
+  }
+}

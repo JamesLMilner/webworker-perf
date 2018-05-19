@@ -25,14 +25,13 @@ const createData = (number, n) => {
 }
 
 
-const timeWorker = (data, toString) => {
+const timeWorker = (data, stringify) => {
     const n = Object.keys(data).length;
     console.log("Using worker number", data.label);
     let workerFile = `./worker.js`;
 
-    if (toString) {
+    if (stringify) {
         workerFile = './worker-stringify.js';
-        data = JSON.stringify(data);
     }
 
     return new Promise((resolve) => {
@@ -40,13 +39,20 @@ const timeWorker = (data, toString) => {
         const workerStart = performance.now();
         const worker = new Worker(workerFile);
         const workerTime = performance.now() - workerStart;
+        
         const sendStart = performance.now();
+        if (stringify) {
+            data = JSON.stringify(data);
+        }
 
         worker.postMessage({data: data});
         const sendEnd = performance.now();
         const sendTime = sendEnd - sendStart;
     
         worker.onmessage = (e) => {
+            if (stringify) {
+                data = JSON.parse(e.data.data);
+            }
             const onmessageTime = Date.now() - e.data.now;
 
             const terminateStart = performance.now();

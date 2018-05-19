@@ -25,19 +25,24 @@ const createData = (number, n) => {
 }
 
 
-const timeWorker = (data) => {
+const timeWorker = (data, toString) => {
     const n = Object.keys(data).length;
     console.log("Using worker number", data.label);
-    const workerFile = `./worker.js`;
+    let workerFile = `./worker.js`;
+
+    if (toString) {
+        workerFile = './worker-stringify.js';
+        data = JSON.stringify(data);
+    }
 
     return new Promise((resolve) => {
         
         const workerStart = performance.now();
         const worker = new Worker(workerFile);
         const workerTime = performance.now() - workerStart;
-
         const sendStart = performance.now();
-        worker.postMessage(data);
+
+        worker.postMessage({data: data});
         const sendEnd = performance.now();
         const sendTime = sendEnd - sendStart;
     
@@ -62,11 +67,15 @@ const timeWorker = (data) => {
 
 };
 
-const createChart = (data) => {
+const createChart = (data, stringify) => {
     if (!window.Chart) {
         return;
     }
-    const ctx = document.getElementById('chart').getContext('2d');
+    let suffix = "";
+    if (stringify) {
+       suffix = "-stringify";
+    }
+    const ctx = document.getElementById('chart' + suffix).getContext('2d');
     // const labels = ["create", "postMessage", "onmessage",  "terminate"];
     const colors = ["#63cc8a", "#6389cc", "#b763cc", "#cc6376", "#c6cc63", "#cc9b63", "#cc6363"]
     const labels = ["postMessage", "onmessage"];
@@ -90,6 +99,7 @@ const createChart = (data) => {
             labels: labels,
             datasets: datasets
         },
+        backgroundColor: "#ffffff",
         options: {
 
             scales: {
@@ -116,38 +126,45 @@ const createChart = (data) => {
     return chart;
 }
 
-const runTest = async () => {
+const runTest = async (stringify) => {
+
+    let suffix = "";
+    if (stringify) {
+        suffix = "-stringify"
+    }
+
     const results = [];
-    const dataContainer = document.getElementById("results");
+    const dataContainer = document.getElementById("results" + suffix);
     let n = 10;
     const max = 10000000;
     let i = 1;
 
     while (n < max) {
-        console.log("Timing worker for n", n)
+        console.log("Timing worker for n", n, " stringifed? ", stringify);
         const data = createData(i, n);
-        const result = await timeWorker(data);
+        const result = await timeWorker(data, stringify);
         results.push(result);
         n = n * 10;
         i++;
     }
     
-    Promise.all(results).then((allResults) => {
+    return Promise.all(results).then((allResults) => {
         console.log(allResults);
         allResults.forEach((result) => {
             const resultContainer = document.createElement("div");
             resultContainer.className = "result";
             dataContainer.appendChild(resultContainer);
             resultContainer.innerHTML = JSON.stringify(result, null, 4);
-            
         })
         
         document.getElementById("loading").style.display = "none";
         document.getElementById("data").style.display = "initial";
-        const chart = createChart(allResults);
+        document.getElementById("data-stringify").style.display = "initial";
+        const chart = createChart(allResults, stringify);
         console.log(chart);
     })
 
 }
 
-runTest();
+runTest(false);
+runTest(true);

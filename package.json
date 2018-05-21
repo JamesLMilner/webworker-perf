@@ -7,7 +7,8 @@
   "module": "dist/webworker.bench.m.js",
   "scripts": {
     "lint": "eslint ./",
-    "build": "microbundle ./webworker.bench.js"
+    "watch" : "webpack --watch --config dev.js",
+    "build": "webpack --config webpack.config.js"
   },
   "repository": {
     "type": "git",
@@ -20,15 +21,20 @@
   },
   "homepage": "https://github.com/JamesMilnerUK/webworker-perf#readme",
   "dependencies": {
-    "eslint": "^4.19.1"
+    "chart.js": "^2.7.2",
+    "eslint": "^4.19.1",
+    "webpack": "^4.8.3"
   },
   "eslintConfig": {
     "parserOptions": {
       "ecmaVersion": 8
     },
-    "rules" : {
+    "rules": {
       "no-undef": 0
     },
     "extends": "eslint:recommended"
+  },
+  "devDependencies": {
+    "webpack-cli": "^2.1.3"
   }
 }

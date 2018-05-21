@@ -1,6 +1,7 @@
 import {Chart} from "chart.js";
+import greenlet from "greenlet";
 
-export class WebWorkerBench {
+export class GreenletBench {
 
     constructor() {
     }
@@ -32,51 +33,32 @@ export class WebWorkerBench {
     }
 
 
-    timeWorker (data, stringify) {
+    async timeWorker (data, stringify) {
         const n = Object.keys(data).length;
         console.log("Using worker number", data.label);
-        let workerFile = `./worker.js`;
 
-        if (stringify) {
-            workerFile = './worker-stringify.js';
+        const exampleAsyncFunc = async (data) => {
+            return data;
         }
 
-        return new Promise((resolve) => {
-            
-            const workerStart = performance.now();
-            const worker = new Worker(workerFile);
-            const workerTime = performance.now() - workerStart;
-            
-            const sendStart = performance.now();
-            if (stringify) {
-                data = JSON.stringify(data);
-            }
-
-            worker.postMessage({data: data});
-            const sendEnd = performance.now();
-            const sendTime = sendEnd - sendStart;
+        const workerStart = performance.now();
+        const worker = greenlet(exampleAsyncFunc);
+        const workerTime = performance.now() - workerStart;
         
-            worker.onmessage = (e) => {
-                if (stringify) {
-                    data = JSON.parse(e.data.data);
-                }
-                const onmessageTime = Date.now() - e.data.now;
+        const awaitStart = performance.now();
+        if (stringify) {
+            data = JSON.stringify(data);
+        }
 
-                const terminateStart = performance.now();
-                worker.terminate();
-                const terminateTime = performance.now() - terminateStart;
-                const result = {
-                    n: n,
-                    create : workerTime,
-                    postMessage : sendTime,
-                    onmessage : onmessageTime,
-                    terminate: terminateTime
-                }
-                
-                resolve(result);
-
-            }
-        })
+        const result = await worker(data); 
+        const awaitEnd = performance.now();
+        const awaitTime = awaitEnd - awaitStart;
+        
+        return {
+            n: n,
+            create : workerTime,
+            await : awaitTime
+        }
 
     };
 
@@ -91,16 +73,14 @@ export class WebWorkerBench {
         const ctx = document.getElementById('chart' + suffix).getContext('2d');
         // const labels = ["create", "postMessage", "onmessage",  "terminate"];
         const colors = ["#63cc8a", "#6389cc", "#b763cc", "#cc6376", "#c6cc63", "#cc9b63", "#cc6363"]
-        const labels = ["postMessage", "onmessage"];
+        const labels = ["await"];
 
         const datasets = data.map((d, i) => {
             return {
                 label: "" + d.n,
                 data: [
                     //parseInt(d.create),
-                    parseInt(d.postMessage),
-                    parseInt(d.onmessage),
-                    //parseInt(d.terminate)
+                    parseInt(d.await)
                 ],
                 backgroundColor: colors[i]
             }
@@ -160,7 +140,7 @@ export class WebWorkerBench {
             n = n * 10;
             i++;
         }
-        
+
         return Promise.all(results).then((allResults) => {
             console.log(allResults);
             allResults.forEach((result) => {

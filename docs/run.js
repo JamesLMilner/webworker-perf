@@ -1,2 +1,5 @@
 import { WebWorkerBench } from "./webworker.bench";
-const bench = new WebWorkerBench();
+import { GreenletBench } from "./greenlet.bench";
+
+window.WebWorkerBench = WebWorkerBench;
+window.GreenletBench = GreenletBench;

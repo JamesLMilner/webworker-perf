@@ -36,38 +36,38 @@
     </head>
     <body>
 
-        <h1> Web Worker Benchmark </h1>
+        <h1> Greenlet Benchmark </h1>
         <h1 id="loading"> Loading... </h1>
 
         <main id="data">
             <section>
-                <h4>Chart - Web Worker Performance (n is number of object keys transfered)</h4>
+                <h4>Chart - Greenlet Performance (n is number of object keys transfered)</h4>
                 <canvas id="chart"></canvas>
             </section>
 
             <section id="results">
-                <h4>Data - Web Worker Performance (n is number of object keys transfered)</h4>
+                <h4>Data - Greenlet Performance (n is number of object keys transfered)</h4>
             </section>
         </main>  
 
         <main id="data-stringify">
             <section>
-                <h4>Chart - Web Worker Performance (n is number of object keys transfered) - Using JSON.stringfy</h4>
+                <h4>Chart - Greenlet Performance (n is number of object keys transfered) - Using JSON.stringfy</h4>
                 <canvas id="chart-stringify"></canvas>
             </section>
 
             <section id="results-stringify">
-                <h4>Data - Web Worker Performance (n is number of object keys transfered) - Using JSON.stringfy</h4>
+                <h4>Data - GreenletPerformance (n is number of object keys transfered) - Using JSON.stringfy</h4>
             </section>
         </main>  
 
         <script src="webworker.bench.bundle.js"></script>
         <script>
-            if (WebWorkerBench) {
-                console.log("Running Web Worker Benchmarks...")
-                var bench = new WebWorkerBench() 
+            if (window.GreenletBench) {
+                var bench = new GreenletBench() 
                 bench.runTests();
             }
         </script>
+
     </body>
 </html>

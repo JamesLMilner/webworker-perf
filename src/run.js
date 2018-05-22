@@ -1,3 +1,3 @@
-import { WebWorkerBench } from "./webworker.bench";
+import { WebWorkerBenchmark } from "./webworker.bench";
 
-window.WebWorkerBench = WebWorkerBench;
+window.WebWorkerBenchmark = WebWorkerBenchmark;

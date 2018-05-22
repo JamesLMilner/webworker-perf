@@ -2,9 +2,8 @@
   "name": "webworkerperf",
   "version": "1.0.0",
   "description": "",
-  "source": "webworker.bench.js",
-  "main": "dist/webworker.bench.umd.js",
-  "module": "dist/webworker.bench.m.js",
+  "source": "src/webworker.bench.js",
+  "main": "docs/webworker.bench.bundle.js",
   "scripts": {
     "lint": "eslint ./",
     "watch": "webpack --watch --config webpack.config.dev.js",
@@ -28,10 +27,13 @@
   },
   "eslintConfig": {
     "parserOptions": {
-      "ecmaVersion": 8
+      "ecmaVersion": 8,
+      "sourceType": "module"
+    },
+    "globals" : {
+      "document" : true
     },
     "rules": {
-      "no-undef": 0
     },
     "extends": "eslint:recommended"
   },

@@ -32,42 +32,62 @@
             #chart, #chart-stringify {
                 background-color: #ffffff;
             }
+            select {
+                margin-top: 20px;
+                margin-bottom: 20px;
+                width: 300px;
+                height: 50px;
+                display: flex;
+                margin: auto;
+            }
         </style>
     </head>
     <body>
 
         <h1> Web Worker Benchmark </h1>
-        <h1 id="loading"> Loading... </h1>
 
-        <main id="data">
-            <section>
-                <h4>Chart - Web Worker Performance (n is number of object keys transfered)</h4>
-                <canvas id="chart"></canvas>
-            </section>
+        <!-- <h1 id="loading"> Loading... </h1> -->
 
-            <section id="results">
-                <h4>Data - Web Worker Performance (n is number of object keys transfered)</h4>
-            </section>
-        </main>  
+        <select id="selection">
+            <option>Select an option</option>
+            <option>Web Worker</option>
+            <option>Greenlet</option>
+        </select>
 
-        <main id="data-stringify">
-            <section>
-                <h4>Chart - Web Worker Performance (n is number of object keys transfered) - Using JSON.stringfy</h4>
-                <canvas id="chart-stringify"></canvas>
-            </section>
-
-            <section id="results-stringify">
-                <h4>Data - Web Worker Performance (n is number of object keys transfered) - Using JSON.stringfy</h4>
-            </section>
-        </main>  
+        <div id="bench-container">
+        </div>
 
         <script src="webworker.bench.bundle.js"></script>
         <script>
-            if (WebWorkerBench) {
-                console.log("Running Web Worker Benchmarks...")
-                var bench = new WebWorkerBench() 
-                bench.runTests();
-            }
+
+            document.getElementById("selection").addEventListener("change", function(event) {
+
+                var container = document.getElementById("bench-container");
+
+                function empty() {
+                    container.innerHTML = "";
+                }
+
+                var result = event.target.value;
+                switch(result) {
+                case "Web Worker":
+                    empty();
+                     if (WebWorkerBench) {
+                        console.log("Running Web Worker Benchmarks...")
+                        var bench = new WebWorkerBench(container);
+                        bench.runWorkerBenchmarks();
+                    }
+                    break;
+                case "Greenlet":
+                    if (WebWorkerBench) {
+                        console.log("Running Greenlet Benchmarks...")
+                        var bench = new WebWorkerBench(container);
+                        bench.runGreenletBenchmarks();
+                    }
+                    break;
+                }
+            })
+
         </script>
     </body>
 </html>

@@ -4,7 +4,7 @@ module.exports = {
   mode: 'development',
   entry: './src/run.js',
   output: {
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, 'docs'),
     filename: 'webworker.bench.bundle.js'
   }
 };

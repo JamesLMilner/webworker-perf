@@ -1,41 +1,46 @@
-import {Chart} from "chart.js";
+import greenlet from "greenlet";
+import Chart from "chart.js";
 
 export class WebWorkerBench {
 
-    constructor() {
-        this.runTests();
+    constructor(parentContainer) {
+        this.parentContainer = parentContainer
     }
 
-    createData (number, n) {
-        const data = { label : number };
-        const dataTypes = ["object", "string", "boolean", "array", "number"];
-        for (let i = 0; i < n - 1; i++) {
-            const x = dataTypes[Math.floor(Math.random()*dataTypes.length)];
-            switch(x){
-            case "object":
-                data[i] = {};
-                break;
-            case "string":
-                data[i] = "test";
-                break;
-            case "boolean":
-                data[i] = false;
-                break;
-            case "array": 
-                data[i] = [];
-                break;
-            case "number":
-                data[i] = 1;
-                break;
+    async timeGreenlet (data, stringify) {
+        const n = Object.keys(data).length;
+        
+        const exampleAsyncFunc = async (data, stringify) => {
+            if (stringify) {
+                data = JSON.parse(data);
+                data = JSON.stringify(data);
             }
+            return data;
         }
-        return data;
-    }
+        const workerStart = performance.now();
+        const worker = greenlet(exampleAsyncFunc);
+        const workerTime = performance.now() - workerStart;
+        
+        const awaitStart = performance.now();
+        if (stringify) {
+            data = JSON.stringify(data);
+        }
 
+        const result = await worker(data, stringify); 
+        const awaitEnd = performance.now();
+        const awaitTime = awaitEnd - awaitStart;
+        
+        return {
+            n: n,
+            create : workerTime,
+            await : awaitTime
+        }
+
+    };
 
     timeWorker (data, stringify) {
         const n = Object.keys(data).length;
-        console.log("Using worker number", data.label);
+
         let workerFile = `./worker.js`;
 
         if (stringify) {
@@ -81,15 +86,9 @@ export class WebWorkerBench {
 
     };
 
-    createChart(data, stringify) {
-        if (!window.Chart) {
-            return;
-        }
-        let suffix = "";
-        if (stringify) {
-        suffix = "-stringify";
-        }
-        const ctx = document.getElementById('chart' + suffix).getContext('2d');
+    createWorkerChart(data, stringify, chartElement) {
+  
+        const ctx = chartElement.getContext('2d');
         // const labels = ["create", "postMessage", "onmessage",  "terminate"];
         const colors = ["#63cc8a", "#6389cc", "#b763cc", "#cc6376", "#c6cc63", "#cc9b63", "#cc6363"]
         const labels = ["postMessage", "onmessage"];
@@ -107,7 +106,116 @@ export class WebWorkerBench {
             }
         })
 
-        const chart = new Chart(ctx, {
+        const chart = this.createChart(ctx, labels, datasets);
+
+        return chart;
+    }
+
+    createGreenletChart(data, stringify, chartElement) {
+        const ctx = chartElement.getContext('2d');
+        // const labels = ["create", "postMessage", "onmessage",  "terminate"];
+        const colors = ["#63cc8a", "#6389cc", "#b763cc", "#cc6376", "#c6cc63", "#cc9b63", "#cc6363"]
+        const labels = ["await"];
+
+        let n = 1;
+        const datasets = data.map((d, i) => {
+            n = n * 10;
+            return {
+                label: "" + (n),
+                data: [
+                    //parseInt(d.create),
+                    parseInt(d.await)
+                ],
+                backgroundColor: colors[i]
+            }
+        })
+
+        const chart = this.createChart(ctx, labels, datasets);
+        return chart;
+    }
+
+    createData(n, transferable) {
+
+        if (transferable) {
+            const arr = []
+            while (arr.length < n) arr.push(parseInt(10 * Math.random(), 10));
+            const typed = new Int32Array(arr);
+            return typed;
+        }
+
+        const data = {};
+        const dataTypes = ["object", "string", "boolean", "array", "number"];
+        for (let i = 0; i < n; i++) {
+            const x = dataTypes[Math.floor(Math.random()*dataTypes.length)];
+            switch(x){
+            case "object":
+                data[i] = {};
+                break;
+            case "string":
+                data[i] = "test";
+                break;
+            case "boolean":
+                data[i] = false;
+                break;
+            case "array": 
+                data[i] = [];
+                break;
+            case "number":
+                data[i] = 1;
+                break;
+            }
+        }
+        return data;
+    }
+
+    async runTest(options) {
+
+        const results = [];
+        let n = 10;
+        const max = 10000000;
+        let i = 1;
+
+        while (n < max) {
+            let result;
+            console.log("Timing worker for n", n, " stringifed? ", options.stringify);
+            const data = this.createData(n, options.transferable);
+            if (options.type === "worker") {
+                result = await this.timeWorker(data, options.stringify);
+            } else if (options.type === "greenlet") {
+                result = await this.timeGreenlet(data, options.stringify);
+            }
+            results.push(result);
+            n = n * 10;
+            i++;
+        }
+
+        return this.createFigures(results, options);
+
+    }
+
+    createFigures(results, options) {
+        const containers = this.createContainer();
+        return Promise.all(results).then((allResults) => {
+            console.log(allResults);
+            containers.results.className = "result";
+            allResults.forEach((result) => {
+                const r = document.createElement("p");
+                r.innerHTML = JSON.stringify(result, null, 4);
+                containers.results.appendChild(r);
+            });
+            containers.chartTitle.innerText = options.label + " (values are number of object keys)"
+            if (options.type === "greenlet") {
+                this.createGreenletChart(allResults, options.stringify, containers.chart);
+            } else if (options.type === "worker") {
+                this.createWorkerChart(allResults, options.stringify, containers.chart)
+            }
+            this.parentContainer.appendChild(containers.container);
+
+        });
+    }
+
+    createChart (ctx, labels, datasets) {
+        return new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels,
@@ -115,7 +223,6 @@ export class WebWorkerBench {
             },
             backgroundColor: "#ffffff",
             options: {
-
                 scales: {
                     yAxes : [{
                         scaleLabel : {
@@ -136,54 +243,34 @@ export class WebWorkerBench {
                 }
             }
         });
-
-        return chart;
     }
 
-    async runTest(stringify) {
-
-        let suffix = "";
-        if (stringify) {
-            suffix = "-stringify"
+    createContainer() {
+        const containers = {
+            container : document.createElement("div"),
+            chartTitle : document.createElement("h1"),
+            chart : document.createElement("canvas"),
+            resultTitle : document.createElement("h1"),
+            results : document.createElement("div")
         }
 
-        const results = [];
-        const dataContainer = document.getElementById("results" + suffix);
-        let n = 10;
-        const max = 10000000;
-        let i = 1;
-
-        while (n < max) {
-            console.log("Timing worker for n", n, " stringifed? ", stringify);
-            const data = this.createData(i, n);
-            const result = await this.timeWorker(data, stringify);
-            results.push(result);
-            n = n * 10;
-            i++;
-        }
-        
-        return Promise.all(results).then((allResults) => {
-            console.log(allResults);
-            allResults.forEach((result) => {
-                const resultContainer = document.createElement("div");
-                resultContainer.className = "result";
-                dataContainer.appendChild(resultContainer);
-                resultContainer.innerHTML = JSON.stringify(result, null, 4);
-            })
-            
-            document.getElementById("loading").style.display = "none";
-            document.getElementById("data").style.display = "initial";
-            document.getElementById("data-stringify").style.display = "initial";
-            const chart = this.createChart(allResults, stringify);
-            console.log(chart);
-        })
-
+        containers.container.appendChild(containers.chartTitle);
+        containers.container.appendChild(containers.chart);
+        containers.container.appendChild(containers.resultTitle);
+        containers.container.appendChild(containers.results);
+        return containers;
     }
 
-    runTests() {
-        this.runTest(false).then(() => {
-            this.runTest(true);
-        });
+    async runWorkerBenchmarks() {
+        await this.runTest({type: "worker", label: "Web Worker"});
+        await this.runTest({type: "worker", label : "Web Worker - Stringify", stringify: true});
+        await this.runTest({type: "worker", label : "Web Worker - Transferable", transferable: true});
+    }
+
+    async runGreenletBenchmarks() {
+        await this.runTest({type: "greenlet", label: "Greenlet"});
+        await this.runTest({type: "greenlet", label : "Greenlet - Stringify", stringify: true});
+        await this.runTest({type: "greenlet", label : "Greenlet - Transferable", transferable: true});
     }
 
 }

@@ -22,7 +22,7 @@
   "dependencies": {
     "chart.js": "^2.7.2",
     "eslint": "^4.19.1",
-    "greenlet": "^0.1.2",
+    "greenlet": "^1.0.1",
     "webpack": "^4.8.3"
   },
   "eslintConfig": {
@@ -30,10 +30,11 @@
       "ecmaVersion": 8,
       "sourceType": "module"
     },
-    "globals" : {
-      "document" : true
+    "env" : {
+      "browser" : "true"
     },
     "rules": {
+      "no-console": "0"
     },
     "extends": "eslint:recommended"
   },

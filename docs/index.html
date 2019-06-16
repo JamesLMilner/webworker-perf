@@ -81,8 +81,10 @@
 
                 var container = document.getElementById("bench-container");
                 var bench = new WebWorkerBenchmark(container);
+                var select = document.getElementById("selection");
 
-                document.getElementById("selection").addEventListener("change", function(event) {
+                select.value = "Select an option";
+                select.addEventListener("change", function(event) {
                     var el = event.target;
                     container.innerHTML = "";
                     var result = event.target.value;

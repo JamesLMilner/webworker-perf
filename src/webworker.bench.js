@@ -221,9 +221,9 @@ export class WebWorkerBenchmark {
 
 		const results = [];
 		let n = 10;
-		const max = 10000000;
+		const max = 100000;
 
-		while (n < max) {
+		while (n <= max) {
 			let result;
 			console.log("Timing worker for n", n, " stringifed? ", options.stringify);
 			const data = this.createData(n, options.transferable);
@@ -275,20 +275,30 @@ export class WebWorkerBenchmark {
 			},
 			backgroundColor: "#ffffff",
 			options: {
+				layout: {
+					padding: {
+						left: 25,
+						right: 25,
+						top: 25,
+						bottom: 25
+					}
+				},
 				scales: {
 					yAxes : [{
 						scaleLabel : {
 							display: true,
+							fontSize: 16,
 							labelString: "Milliseconds"
 						},
 						ticks: {
 							suggestedMin: 0,
-							suggestedMax: 500
+							suggestedMax: 50
 						}
 					}],
 					xAxes : [{
 						scaleLabel : {
 							display: true,
+							fontSize: 16,
 							labelString: "Method"
 						}
 					}]
@@ -298,6 +308,7 @@ export class WebWorkerBenchmark {
 	}
 
 	createContainer() {
+		console.log("cool");
 		const elements = {
 			container : document.createElement("div"),
 			chartTitle : document.createElement("h1"),
@@ -306,6 +317,7 @@ export class WebWorkerBenchmark {
 			results : document.createElement("div")
 		}
 
+		// elements.container.style = "position: relative; height:500px; width:80vw";
 		elements.container.appendChild(elements.chartTitle);
 		elements.container.appendChild(elements.chart);
 		elements.container.appendChild(elements.resultTitle);

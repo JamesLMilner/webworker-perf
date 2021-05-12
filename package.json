@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/JamesMilnerUK/webworker-perf#readme",
   "dependencies": {
-    "chart.js": "^2.7.2",
+    "chart.js": "^2.9.4",
     "eslint": "^4.19.1",
     "greenlet": "^1.0.1",
     "webpack": "^4.8.3"
